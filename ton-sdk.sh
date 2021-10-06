@@ -210,11 +210,16 @@ wait_for_build_if_needed() {
 }
 
 run() {
+  NO_DOCKER_IMAGES=$(docker ps -f name=ton-node-se1 -q | wc -l)
+  if [ "${NO_DOCKER_IMAGES}" -eq "1" ]; then
+    verbose "Image ${NODE_SE_IMAGE} is already running"
+    return
+  fi
   if [ "${PULL_NODE_SE}" -eq "1" ]; then
-    verbose "Pulling image ${PULL_NODE_SE}"
+    verbose "Pulling image ${NODE_SE_IMAGE}"
     docker pull ${NODE_SE_IMAGE}
   fi
-  verbose "Running image ${PULL_NODE_SE}"
+  verbose "Running image ${NODE_SE_IMAGE}"
   docker run --name ton-node-se -d -p8888:80 -e USER_AGREEMENT=yes ${NODE_SE_IMAGE}
 }
 
@@ -250,7 +255,9 @@ download_binaries() {
   ARTIFACTS_DOWNLOAD_PATH="${BINARIES_DOWNLOAD_PATH}/${SDK_VERSION_TAG}"
   if mkdir -p "${ARTIFACTS_DOWNLOAD_PATH}"; then
     verbose "Downloading artifacts for run ${RUN_ID} into ${ARTIFACTS_DOWNLOAD_PATH}"
-    gh run download "${RUN_ID}" -D "${ARTIFACTS_DOWNLOAD_PATH}"
+    # can't ensure everything is already downloaded
+    # so ignore download errors.
+    gh run download "${RUN_ID}" -D "${ARTIFACTS_DOWNLOAD_PATH}" || true
   else
     echo "Unable to create directory ${ARTIFACTS_DOWNLOAD_PATH}"
     exit 1
@@ -343,7 +350,7 @@ update_dotnet() {
   CD=$(pwd)
 
   verbose "Checking out SDK at ${SDK_VERSION_TAG}"
-  cd "${SDK_SOURCE_PATH}" && git checkout "${SDK_VERSION_TAG}"
+  cd "${SDK_SOURCE_PATH}" && git fetch && git checkout "${SDK_VERSION_TAG}"
   cd "${DOTNET_SOURCE_PATH}"
 
   if [ "${SKIP_BINARIES_COPY}" -eq 0 ]; then
@@ -469,7 +476,7 @@ update_php() {
   verbose "Found current PHP SDK version: ${CURRENT_SDK_VERSION}"
   if [ ! "${CURRENT_SDK_VERSION}" = "${SDK_VERSION_TAG}" ]; then
     verbose "Checking out SDK at ${SDK_VERSION_TAG}"
-    cd "${SDK_SOURCE_PATH}" && git checkout "${SDK_VERSION_TAG}"
+    cd "${SDK_SOURCE_PATH}" && git fetch && git checkout "${SDK_VERSION_TAG}"
     cd "${PHP_SOURCE_PATH}"
     verbose "Copying api.json"
     cp "${SDK_SOURCE_PATH}/tools/api.json" api.json
