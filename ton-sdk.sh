@@ -24,6 +24,7 @@ SDK_VERSION_TAG=
 SKIP_BINARIES_BUILD=0
 SKIP_BINARIES_DOWNLOAD=0
 SKIP_BINARIES_COPY=0
+REMOVE_EXISTING_CONTAINER=0
 IGNORE_BUILD_FAILURES=0
 VERBOSE=0
 WAIT=1
@@ -69,6 +70,7 @@ List of commands with command-specific options:
       -l          - Pull latest Node SE image (enabled by default).
       -L          - Do not pull latest Node SE image.
       -p <PORT>   - Container port (${NODE_SE_PORT} by default).
+      -r          - Remove existing docker container if already running.
 
   php - Upgrade PHP SDK sources to the specified version.
     Options:
@@ -119,7 +121,7 @@ help() {
   exit 0
 }
 
-while getopts "b:Bd:DhilLp:s:t:TvwWx:X" opt; do
+while getopts "b:Bd:DhilLp:rs:t:TvwWx:X" opt; do
 case ${opt} in
   b)
     BINARIES_SDK_BRANCH=$OPTARG
@@ -150,6 +152,9 @@ case ${opt} in
     if [ "${COMMAND}" = "binaries" ]; then BINARIES_SOURCE_PATH=$OPTARG; fi
     if [ "${COMMAND}" = "dotnet" ]; then DOTNET_SOURCE_PATH=$OPTARG; fi
     if [ "${COMMAND}" = "php" ]; then PHP_SOURCE_PATH=$OPTARG; fi
+    ;;
+  r)
+    REMOVE_EXISTING_CONTAINER=1
     ;;
   s)
     SDK_SOURCE_PATH=$OPTARG
@@ -210,17 +215,23 @@ wait_for_build_if_needed() {
 }
 
 run() {
-  NO_DOCKER_IMAGES=$(docker ps -f name=ton-node-se1 -q | wc -l)
+  CONTAINER_NAME=ton-node-se
+  NO_DOCKER_IMAGES=$(docker ps -f name=${CONTAINER_NAME} -q | wc -l)
   if [ "${NO_DOCKER_IMAGES}" -eq "1" ]; then
     verbose "Image ${NODE_SE_IMAGE} is already running"
-    return
+    if [ "${REMOVE_EXISTING_CONTAINER}" -eq "1" ]; then
+      verbose "Removing existing container ${CONTAINER_NAME} for image ${NODE_SE_IMAGE}"
+      docker rm -f ${CONTAINER_NAME}
+    else
+      return
+    fi
   fi
   if [ "${PULL_NODE_SE}" -eq "1" ]; then
     verbose "Pulling image ${NODE_SE_IMAGE}"
     docker pull ${NODE_SE_IMAGE}
   fi
   verbose "Running image ${NODE_SE_IMAGE}"
-  docker run --name ton-node-se -d -p8888:80 -e USER_AGREEMENT=yes ${NODE_SE_IMAGE}
+  docker run --name ${CONTAINER_NAME} -d -p8888:80 -e USER_AGREEMENT=yes ${NODE_SE_IMAGE}
 }
 
 check_version_tag() {
