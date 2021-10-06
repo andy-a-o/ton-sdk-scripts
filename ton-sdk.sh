@@ -196,13 +196,18 @@ verbose() {
 
 wait_for_build_if_needed() {
   BUILD_NAME=$1
+  WORKFLOW_NAME=$2
+  RUN_COMMAND="gh run list --limit 1"
+  if [ ! "${WORKFLOW_NAME}" = "" ]; then
+    RUN_COMMAND="${RUN_COMMAND} -w ${WORKFLOW_NAME}"
+  fi
   if [ "${WAIT}" -eq 1 ]; then
     verbose "Waiting for build ${BUILD_NAME} to finish"
-    RUN_ID=$(gh run list --limit 1 | grep "${BUILD_NAME}" | perl -pe "s/.*${BUILD_NAME}.*?([0-9]+?)\s.*/\$1/g")
+    RUN_ID=$($RUN_COMMAND | grep "${BUILD_NAME}" | perl -pe "s/.*${BUILD_NAME}.*?([0-9]+?)\s.*/\$1/g")
     while [ "${RUN_ID}" = "" ]; do
       verbose "Workflow not running. Waiting 10 seconds"
       sleep 10
-      RUN_ID=$(gh run list --limit 1 | grep "${BUILD_NAME}" | perl -pe "s/.*${BUILD_NAME}.*?([0-9]+?)\s.*/\$1/g")
+      RUN_ID=$($RUN_COMMAND | grep "${BUILD_NAME}" | perl -pe "s/.*${BUILD_NAME}.*?([0-9]+?)\s.*/\$1/g")
     done
     if [ "${IGNORE_BUILD_FAILURES}" -eq "0" ]; then
       gh run watch --exit-status "${RUN_ID}"
@@ -406,7 +411,7 @@ update_dotnet() {
   git add .
   if git commit -a -m "Upgrade to SDK version ${SDK_VERSION_TAG}."; then
     git push origin master
-    wait_for_build_if_needed master
+    wait_for_build_if_needed master "Run Tests"
   else
     verbose "Nothing to commit"
   fi
@@ -414,7 +419,7 @@ update_dotnet() {
   verbose "Pushing new version tag ${SDK_VERSION_TAG}"
   if git tag "${SDK_VERSION_TAG}"; then
     git push origin "${SDK_VERSION_TAG}"
-    wait_for_build_if_needed "$SDK_VERSION_TAG"
+    wait_for_build_if_needed "$SDK_VERSION_TAG" "Release"
   fi
 
   cd "${CD}"
@@ -453,7 +458,7 @@ update_php_ext() {
     git push origin master
     git tag "${SDK_VERSION_TAG}"
     git push origin "${SDK_VERSION_TAG}"
-    wait_for_build_if_needed "$SDK_VERSION_TAG"
+    wait_for_build_if_needed "${SDK_VERSION_TAG}" "Release"
   else
     verbose "SDK version ${SDK_VERSION_TAG} is already built"
   fi
@@ -517,13 +522,13 @@ update_php() {
   git add .
   if git commit -a -m "Upgrade to SDK version ${SDK_VERSION_TAG}."; then
     git push origin master
-    wait_for_build_if_needed master
+    wait_for_build_if_needed master "Tests"
   fi
 
   verbose "Create new tag ${SDK_VERSION_TAG}"
   if git tag "${SDK_VERSION_TAG}"; then
     git push origin "${SDK_VERSION_TAG}"
-    wait_for_build_if_needed "$SDK_VERSION_TAG"
+    wait_for_build_if_needed "$SDK_VERSION_TAG" "Release"
   fi
 
   cd "${CD}"
