@@ -199,6 +199,7 @@ wait_for_build_if_needed() {
   WORKFLOW_NAME=$2
   RUN_COMMAND="gh run list --limit 1"
   if [ ! "${WORKFLOW_NAME}" = "" ]; then
+    WORKFLOW_NAME="${WORKFLOW_NAME}"
     RUN_COMMAND="${RUN_COMMAND} -w ${WORKFLOW_NAME}"
   fi
   if [ "${WAIT}" -eq 1 ]; then
@@ -228,7 +229,7 @@ run() {
       verbose "Removing existing container ${CONTAINER_NAME} for image ${NODE_SE_IMAGE}"
       docker rm -f ${CONTAINER_NAME}
     else
-      return
+      return 0
     fi
   fi
   if [ "${PULL_NODE_SE}" -eq "1" ]; then
@@ -366,7 +367,7 @@ update_dotnet() {
   CD=$(pwd)
 
   verbose "Checking out SDK at ${SDK_VERSION_TAG}"
-  cd "${SDK_SOURCE_PATH}" && git fetch && git checkout "${SDK_VERSION_TAG}"
+  cd "${SDK_SOURCE_PATH}" && git fetch --tags && git checkout "${SDK_VERSION_TAG}"
   cd "${DOTNET_SOURCE_PATH}"
 
   if [ "${SKIP_BINARIES_COPY}" -eq 0 ]; then
