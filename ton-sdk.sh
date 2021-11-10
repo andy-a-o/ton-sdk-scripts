@@ -397,7 +397,7 @@ update_dotnet() {
   verbose "Copying test contracts"
   cp -rf "${SDK_SOURCE_PATH}/ton_client/src/tests/contracts" tests/Resources
 
-  VERSION_FILES=$(grep -r "${CURRENT_SDK_VERSION}" -l . | grep -v '/bin/' | grep -v '/runtimes/' | grep -v '.git/' | tr '\n' ' ')
+  VERSION_FILES=$(grep -rF "${CURRENT_SDK_VERSION}" -l . | grep -v '/bin/' | grep -v '/runtimes/' | grep -v '.git/' | grep -v 'node_modules' | tr '\n' ' ')
   verbose "Replacing version in files ${VERSION_FILES}"
   replace_in_files "${CURRENT_SDK_VERSION}" "${SDK_VERSION_TAG}" ${VERSION_FILES}
 
@@ -499,7 +499,7 @@ update_php() {
     cp "${SDK_SOURCE_PATH}/tools/api.json" api.json
     verbose "Copying test contracts"
     cp -rf "${SDK_SOURCE_PATH}/ton_client/src/tests/contracts" tests
-    VERSION_FILES=$(grep -r "${CURRENT_SDK_VERSION}" -l . | grep -v '.git/' | tr '\n' ' ')
+    VERSION_FILES=$(grep -rF "${CURRENT_SDK_VERSION}" -l . | grep -v '.git/' | tr '\n' ' ')
     verbose "Replacing version in files ${VERSION_FILES}"
     replace_in_files "${CURRENT_SDK_VERSION}" "${SDK_VERSION_TAG}" ${VERSION_FILES}
   else
