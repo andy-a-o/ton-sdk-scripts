@@ -367,7 +367,7 @@ update_dotnet() {
   CD=$(pwd)
 
   verbose "Checking out SDK at ${SDK_VERSION_TAG}"
-  cd "${SDK_SOURCE_PATH}" && git fetch --tags && git checkout "${SDK_VERSION_TAG}"
+  cd "${SDK_SOURCE_PATH}" && git fetch --tags -f && git checkout "${SDK_VERSION_TAG}"
   cd "${DOTNET_SOURCE_PATH}"
 
   if [ "${SKIP_BINARIES_COPY}" -eq 0 ]; then
@@ -397,7 +397,7 @@ update_dotnet() {
   verbose "Copying test contracts"
   cp -rf "${SDK_SOURCE_PATH}/ton_client/src/tests/contracts" tests/Resources
 
-  VERSION_FILES=$(grep -rF "${CURRENT_SDK_VERSION}" -l . | grep -v '/bin/' | grep -v '/runtimes/' | grep -v '.git/' | grep -v 'node_modules' | tr '\n' ' ')
+  VERSION_FILES=$(grep -rF "${CURRENT_SDK_VERSION}" -l . | grep -v '/bin/' | grep -v '/runtimes/' | grep -v '.git/' | grep -v 'node_modules' | grep '.cs' | tr '\n' ' ')
   verbose "Replacing version in files ${VERSION_FILES}"
   replace_in_files "${CURRENT_SDK_VERSION}" "${SDK_VERSION_TAG}" ${VERSION_FILES}
 
@@ -493,7 +493,7 @@ update_php() {
   verbose "Found current PHP SDK version: ${CURRENT_SDK_VERSION}"
   if [ ! "${CURRENT_SDK_VERSION}" = "${SDK_VERSION_TAG}" ]; then
     verbose "Checking out SDK at ${SDK_VERSION_TAG}"
-    cd "${SDK_SOURCE_PATH}" && git fetch && git checkout "${SDK_VERSION_TAG}"
+    cd "${SDK_SOURCE_PATH}" && git fetch --tags -f && git checkout "${SDK_VERSION_TAG}"
     cd "${PHP_SOURCE_PATH}"
     verbose "Copying api.json"
     cp "${SDK_SOURCE_PATH}/tools/api.json" api.json
