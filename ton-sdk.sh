@@ -397,7 +397,7 @@ update_dotnet() {
   verbose "Copying test contracts"
   cp -rf "${SDK_SOURCE_PATH}/ton_client/src/tests/contracts" tests/Resources
 
-  VERSION_FILES=$(grep -rF "${CURRENT_SDK_VERSION}" -l . | grep -v '/bin/' | grep -v '/runtimes/' | grep -v '.git/' | grep -v 'node_modules' | grep '.cs' | tr '\n' ' ')
+  VERSION_FILES=$(grep -rF "${CURRENT_SDK_VERSION}" -l . | grep -v '/bin/' | grep -v '/runtimes/' | grep -v 'csprojAssemblyReference.cache' | grep -v '.git/' | grep -v 'node_modules' | grep '.cs' | tr '\n' ' ')
   verbose "Replacing version in files ${VERSION_FILES}"
   replace_in_files "${CURRENT_SDK_VERSION}" "${SDK_VERSION_TAG}" ${VERSION_FILES}
 
