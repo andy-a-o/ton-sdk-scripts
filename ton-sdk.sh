@@ -412,7 +412,7 @@ update_dotnet() {
   git add .
   if git commit -a -m "Upgrade to SDK version ${SDK_VERSION_TAG}."; then
     git push origin master
-    wait_for_build_if_needed master "Run Tests"
+    wait_for_build_if_needed master "Tests"
   else
     verbose "Nothing to commit"
   fi
