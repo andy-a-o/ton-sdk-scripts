@@ -306,8 +306,9 @@ build_new_binaries() {
     else
       verbose "Tag ${BINARIES_TAG} already exists."
     fi
-    wait_for_build_if_needed "${BINARIES_TAG}"
   fi
+
+  wait_for_build_if_needed "${BINARIES_TAG}" "Release"
 
   download_binaries "${BINARIES_TAG}"
 
