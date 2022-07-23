@@ -336,6 +336,7 @@ extract_binary() {
   if [ -d "${ZIP_DIR_PATH}" ]; then
     verbose "Archive is already extracted into ${ZIP_DIR_PATH}"
     verbose "Copying ${ZIP_DIR_PATH}/${ZIP_PATH} to ${EXTRACT_PATH}"
+    mkdir -p $(dirname "${EXTRACT_PATH}")
     cp "${ZIP_DIR_PATH}/${ZIP_PATH}" "${EXTRACT_PATH}"
   else
     ZIP_ARCHIVE="${ZIP_DIR_PATH}.zip"
@@ -436,7 +437,7 @@ update_php_ext() {
   verbose "Updating PHP extension version"
 
   CD=$(pwd)
-  cd "${PHP_EXT_SOURCE_PATHPHP_EXT_SOURCE_PATH}"
+  cd "${PHP_EXT_SOURCE_PATH}"
 
   if [ "${SKIP_BINARIES_COPY}" -eq 0 ]; then
     check_binaries_downloaded
