@@ -264,7 +264,7 @@ download_binaries() {
   fi
 
   BUILD_NAME=$1
-  RUN_ID=$(gh run list | grep "${BUILD_NAME}" | perl -pe "s/.*${BUILD_NAME}.*?([0-9]+?)\s.*/\$1/g")
+  RUN_ID=$(gh run list | grep "${BUILD_NAME}" | perl -pe "s/.*${BUILD_NAME}.*?([0-9]+?)\s.*/\$1/g" | head -n 1)
   if [ "${RUN_ID}" = "" ]; then
     verbose "Workflow not found. Exiting"
     exit 1
