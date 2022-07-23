@@ -251,7 +251,7 @@ check_version_tag() {
 check_binaries_downloaded() {
   if [ ! -d "${BINARIES_DOWNLOAD_PATH}/${SDK_VERSION_TAG}" ]; then
     echo "SDK binaries version ${SDK_VERSION_TAG} not downloaded. Run the following command to download them" 1>&2
-    echo "./${SCRIPT} binaries -d ${BINARIES_DOWNLOAD_PATH}" 1>&2
+    echo "./${SCRIPT} binaries -t ${SDK_VERSION_TAG} -d ${BINARIES_DOWNLOAD_PATH}" 1>&2
     exit 1
   fi
 }
@@ -436,7 +436,7 @@ update_php_ext() {
   verbose "Updating PHP extension version"
 
   CD=$(pwd)
-  cd "${PHP_EXT_SOURCE_PATH}"
+  cd "${PHP_EXT_SOURCE_PATHPHP_EXT_SOURCE_PATH}"
 
   if [ "${SKIP_BINARIES_COPY}" -eq 0 ]; then
     check_binaries_downloaded
