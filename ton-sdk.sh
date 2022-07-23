@@ -264,9 +264,10 @@ download_binaries() {
   fi
 
   BUILD_NAME=$1
-  RUN_ID=$(gh run list --limit 1 | grep "${BUILD_NAME}" | perl -pe "s/.*${BUILD_NAME}.*?([0-9]+?)\s.*/\$1/g")
+  RUN_ID=$(gh run list | grep "${BUILD_NAME}" | perl -pe "s/.*${BUILD_NAME}.*?([0-9]+?)\s.*/\$1/g")
   if [ "${RUN_ID}" = "" ]; then
     verbose "Workflow not found. Exiting"
+    exit 1
   fi
 
   ARTIFACTS_DOWNLOAD_PATH="${BINARIES_DOWNLOAD_PATH}/${SDK_VERSION_TAG}"
@@ -303,12 +304,11 @@ build_new_binaries() {
         echo "Failed to push tag ${BINARIES_TAG}"
         exit 1
       fi
+      wait_for_build_if_needed "${BINARIES_TAG}" "Release"
     else
       verbose "Tag ${BINARIES_TAG} already exists."
     fi
   fi
-
-  wait_for_build_if_needed "${BINARIES_TAG}" "Release"
 
   download_binaries "${BINARIES_TAG}"
 
