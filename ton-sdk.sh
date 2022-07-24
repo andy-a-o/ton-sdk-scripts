@@ -458,16 +458,19 @@ update_php_ext() {
     verbose "Pushing new version tag"
     git add deps src/php_ton_client.h INSTALL.md
     git commit -m "Upgrade to ${SDK_VERSION_TAG}."
-    git push origin master
-    git tag "${SDK_VERSION_TAG}"
-    git push origin "${SDK_VERSION_TAG}"
-    wait_for_build_if_needed "${SDK_VERSION_TAG}" "Release"
   else
     verbose "SDK version ${SDK_VERSION_TAG} is already built"
   fi
 
-  sudo php installer.php -v "${SDK_VERSION_TAG}"
-  php installer.php -v "${SDK_VERSION_TAG}" -T
+  git push origin master
+  git tag "${SDK_VERSION_TAG}" || true
+
+  if git push origin "${SDK_VERSION_TAG}"; then
+    wait_for_build_if_needed "${SDK_VERSION_TAG}" "Release"
+  fi
+
+  sudo php installer.php -v "${SDK_VERSION_TAG}" -f -V
+  php installer.php -v "${SDK_VERSION_TAG}" -T -V
 
   cd "${CD}"
 }
