@@ -512,6 +512,7 @@ update_php() {
   fi
 
   verbose "Generating sources"
+  composer install
   composer generate
 
   verbose "Running composer update"
